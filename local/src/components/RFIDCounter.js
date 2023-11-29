@@ -1,15 +1,28 @@
+// src/components/RFIDCounter.js
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const RFIDCounter = () => {
   const [tagCount, setTagCount] = useState(0);
 
   useEffect(() => {
-    const eventSource = new EventSource('http://localhost:3000/sse');
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('/sse');
+        const rfidTags = response.data;
+        const uniqueTags = [...new Set(rfidTags)]; // เอาเฉพาะ tag ที่ไม่ซ้ำกัน
+        setTagCount(uniqueTags.length);
+      } catch (error) {
+        console.error('Error fetching RFID tags:', error);
+      }
+    };
+
+    fetchData();
+
+    const eventSource = new EventSource('/sse');
 
     eventSource.onmessage = (event) => {
-      const rfidTags = JSON.parse(event.data);
-      console.log('Received RFID Tags:', rfidTags);
-      setTagCount(rfidTags.length);
+      fetchData(); // เมื่อมีข้อมูลใหม่, ทำการดึงข้อมูลอีกครั้ง
     };
 
     return () => {
