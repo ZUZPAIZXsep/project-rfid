@@ -30,12 +30,15 @@
 
     saveButton.addEventListener('click', () => {
       // ทำการบันทึกค่าที่นับไว้
+      ws.send('save');
       alert(`Saved Count: ${uniqueTags.size}`);
     });
 
     resetButton.addEventListener('click', () => {
-      // ทำการรีเซ็ตค่าที่นับไว้เป็น 0
-      alert('Reset Count');
+    // ทำการรีเซ็ตค่าที่นับไว้เป็น 0 และส่งข้อมูล Reset ไปยัง Express server
+    ws.send('reset');
+    // รีเซ็ตค่าที่นับที่แสดงบนหน้าเว็บเอง
+    tagCountElement.textContent = `Tag Count: 0`;
     });
   </script>
 </body>

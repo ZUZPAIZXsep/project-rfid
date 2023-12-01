@@ -38,6 +38,11 @@ function getRfidTags() {
     return rfidTags;
 }
 
+function resetRfidTags() {
+    rfidTags = [];
+  }
+
+
 async function run() {
     if (deviceInfo) {
         var device = new HID.HID(deviceInfo.path);
@@ -74,7 +79,9 @@ run();
 
 module.exports = {
     //getRfidData // ส่งฟังก์ชัน getRfidData ออกไปให้ Express.js ใช้งาน
-    getRfidTags
+    getRfidTags,
+    resetRfidTags
+    
 };
 
 

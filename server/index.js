@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 const http = require('http');
 const WebSocket = require('ws');
 const rfidReader = require('./rfidReader');
@@ -9,15 +8,6 @@ const app = express();
 
 // Serve static files from the React build directory
 app.use(express.static(path.join(__dirname, 'local/build')));
-
-// Proxy requests to React app
-app.use(
-  '/web',
-  createProxyMiddleware({
-    target: 'http://localhost:3001', // Adjust the port if needed
-    changeOrigin: true,
-  })
-);
 
 // Serve index.html directly
 app.get('/', (req, res) => {
@@ -28,8 +18,6 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // WebSocket endpoint
-const ws = new WebSocket('ws://localhost:3000');
-
 wss.on('connection', (ws) => {
   ws.send(JSON.stringify(rfidReader.getRfidTags()));
 
@@ -37,18 +25,20 @@ wss.on('connection', (ws) => {
     console.log('Client disconnected');
   });
 
-  // ส่งข้อมูลเมื่อมีการบันทึกหรือรีเซ็ต
   ws.on('message', (message) => {
     if (message === 'save') {
       console.log('Saved Count:', rfidReader.getRfidTags().length);
       ws.send(JSON.stringify(rfidReader.getRfidTags()));
     } else if (message === 'reset') {
+      // ทำการรีเซ็ตค่าที่นับไว้เป็น 0 และล้างข้อมูล rfid tags ที่เคยจับได้
       console.log('Reset Count');
       rfidReader.resetRfidTags();
+      // ส่งข้อมูล Reset กลับไปยัง client WebSocket
       ws.send(JSON.stringify(rfidReader.getRfidTags()));
     }
   });
 });
+
 
 
 // Periodically send RFID tags to connected WebSocket clients
