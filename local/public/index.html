@@ -9,19 +9,34 @@
 <body>
   <h1>RFID Tag Counter</h1>
   <p id="tagCount">Counting...</p>
+  <button id="saveButton">Save</button>
+  <button id="resetButton">Reset</button>
 
   <script>
-    const eventSource = new EventSource('/sse');
-    const tagCountElement = document.getElementById('tagCount');
+    const ws = new WebSocket('ws://localhost:3000');
 
+    const tagCountElement = document.getElementById('tagCount');
+    const saveButton = document.getElementById('saveButton');
+    const resetButton = document.getElementById('resetButton');
+    
     let uniqueTags = new Set();
 
-    eventSource.onmessage = (event) => {
+    ws.onmessage = (event) => {
       const rfidTags = JSON.parse(event.data);
       uniqueTags = new Set(rfidTags);
 
       tagCountElement.textContent = `Tag Count: ${uniqueTags.size}`;
     };
+
+    saveButton.addEventListener('click', () => {
+      // ทำการบันทึกค่าที่นับไว้
+      alert(`Saved Count: ${uniqueTags.size}`);
+    });
+
+    resetButton.addEventListener('click', () => {
+      // ทำการรีเซ็ตค่าที่นับไว้เป็น 0
+      alert('Reset Count');
+    });
   </script>
 </body>
 </html>
